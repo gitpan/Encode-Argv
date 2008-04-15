@@ -1,15 +1,22 @@
-# $Id: /mirror/coderepos/lang/perl/Encode-Argv/trunk/lib/Encode/Argv.pm 49310 2008-04-01T09:23:43.338869Z daisuke  $
+# $Id: /mirror/coderepos/lang/perl/Encode-Argv/trunk/lib/Encode/Argv.pm 50486 2008-04-15T14:50:02.946222Z daisuke  $
 
 package Encode::Argv;
 use strict;
 use warnings;
 use 5.8.0;
 use Encode ();
-our $VERSION = '0.00001';
+our $VERSION = '0.00002';
 
 sub import
 {
     my ($class, $decode_from, $encode_to) = @_;
+
+    if (! $decode_from) {
+        eval {
+            require Term::Encoding;
+            $decode_from = Term::Encoding::get_encoding();
+        };
+    }
 
     if ($decode_from) {
         foreach (@ARGV) {
@@ -40,6 +47,10 @@ Encode::Argv - Automatically Mess With @ARGV's Encoding
   use Encode::Argv ('cp932' => 'euc-jp');
   # Now @ARGV is encoded into euc-jp after being decoded from cp932
 
+  use Encode::Argv;
+  # Now @ARGV is decoded from whatever Term::Encoding thinks you are
+  # using on your terminal.
+
 =head1 DESCRIPTION
 
 I saw L<http://search.cpan.org/dist/Sjis|Sjis.pm> and L<http://www.aritia.org/hizumi/perl/perlwin.html|this>, and thought, "Well, I can't fix /all/ of their
@@ -54,11 +65,19 @@ All you need to do is to simply specify the encodings you want to use:
 
 There, you got yourself an unicode @ARGV on ShiftJIS Windows.
 
+If in case you don't even want to explicitly specify what encoding to use,
+you could rely on Term::Encoding to find out what you are using. In that
+case you don't have to specify anything:
+
+  use Encode::Argv;
+
+If Term::Encoding is not found, no decoding will be performad
+
 Of course, this doesn't solve the entire problem, but it's at least a start
 
 =head1 AUTHOR
 
-Copyright (c) 2008 Daisuke Maki E<lt>daisuke@endeworks.jpE<gt>
+Copyright (c) 2008 Daisuke Maki C<< daisuke@endeworks.jp >>
 
 =head1 LICENSE
 
